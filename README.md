@@ -45,4 +45,4 @@ How to actually run the thing, with examples.
 
 ## Author
 
-Timmy Murphy, ![GitHub]([https://github.com/tmurph08/CS193-Final-Project---Timmy-Murphy])
+Timmy Murphy, [GitHub](https://github.com/tmurph08)
