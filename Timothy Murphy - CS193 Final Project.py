@@ -1,3 +1,13 @@
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")
+driver = webdriver.Chrome(options)
+
 squad = []   # Squad to be printed to file
 
 class Player:   # Player class!
@@ -24,6 +34,26 @@ class Player:   # Player class!
     def __str__(self):   # toString returns name, position, and jersey number
         return f"Player: {self.name}\nPosition: {self.pos}\nNumber: {self.num}\n"
 
+def scrape():
+    scrape = requests.get("https://www.whufc.com/en/teams/mens-team/mads-hermansen")
+    soup = BeautifulSoup(scrape.content, "html.parser")
+    #birthday = soup.find("span", class_="v3-basicStat-module__information___PwbDG v3-basicStat__information")
+    #print(birthday)
+    toClickCheck = driver.find_elements(By.ID, "player-stats-label")
+    nextPlayer = soup.find("span", string="Next Player")
+    parent = nextPlayer.parent
+    parent2 = parent.parent
+    linkEnd = parent2["href"]
+    link = "https://www.whufc.com" + str(linkEnd)
+    newScrape = requests.get(link)
+    nextSoup = BeautifulSoup(newScrape.content, "html.parser")
+
+def main():
+    scrape()
+
+if __name__ == "__main__":
+    main()
+
 def write():   # Write data to a file
     data = open("West Ham Data.txt", "w")   # Open "West Ham Data.txt" in write mode (creates file if needed)
     textToWrite = "Name\tPosition\tNumber\tNationality\tGames Played\tGoals\tAssists\n"   # Data to be written to the file
@@ -32,7 +62,3 @@ def write():   # Write data to a file
         textToWrite = player.name + "\t" + player.pos + "\t" + str(player.num) + "\t" + player.nation + "\t" + str(player.gp) + "\t" + str(player.goals) + "\t" + str(player.assists) + "\n"   # Gathers data to be written about a player
         data.write(textToWrite)   # Writes data
     data.close()   # Closes writer
-
-
-# NOT pip install
-# py -m pip install
