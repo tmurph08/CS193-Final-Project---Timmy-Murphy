@@ -20,7 +20,6 @@ class Player:   # Player class!
         self.born = born   # Date of birth
         self.debut = debut   # Date of debut game for West Ham
         self.nation = nation   # Nationality
-        self.bio = bio   # Biography
         self.gp = int(gp)   # Number of games played (this season)
         try:
             self.mp = int(mp)   # Minutes played
@@ -29,24 +28,33 @@ class Player:   # Player class!
             self.mp = int(mp[:iComma] + mp[iComma + 1:])   # if there is a comma in the number, delete the comma
         self.assists = int(assists)   # Number of assists (this season)
         self.goals = int(goals)   # Number of goals scored (this season)
-        self.attributes = [self.name, self.pos, self.num, self.shoots, self.signed, self.height, self.born, self.debut, self.nation, self.weight, self.debutGame, self.alias, self.bio, self.gp, self.mp, self.starts, self.assists, self.goals]
+        self.attributes = [self.name, self.pos, self.num, self.signed, self.height, self.born, self.debut, self.nation, self.gp, self.mp, self.assists, self.goals]
 
     def __str__(self):   # toString returns name, position, and jersey number
         return f"Player: {self.name}\nPosition: {self.pos}\nNumber: {self.num}\n"
 
 def scrape():
-    scrape = requests.get("https://www.whufc.com/en/teams/mens-team/mads-hermansen")
-    soup = BeautifulSoup(scrape.content, "html.parser")
-    #birthday = soup.find("span", class_="v3-basicStat-module__information___PwbDG v3-basicStat__information")
-    #print(birthday)
-    toClickCheck = driver.find_elements(By.ID, "player-stats-label")
-    nextPlayer = soup.find("span", string="Next Player")
-    parent = nextPlayer.parent
-    parent2 = parent.parent
-    linkEnd = parent2["href"]
-    link = "https://www.whufc.com" + str(linkEnd)
-    newScrape = requests.get(link)
-    nextSoup = BeautifulSoup(newScrape.content, "html.parser")
+    scrape = requests.get("https://www.whufc.com/en/teams/mens-team/mads-hermansen")   # Starting link
+    currentNumber = ""   # Number of current player
+    while currentNumber != "66":   # Scrapes until hitting the last player (not on loan, not a coach)
+        soup = BeautifulSoup(scrape.content, "html.parser")   # Makes BeautifulSoup object
+        mainInfo = soup.find("div", class_="profileHero_mainInfo__p4f3J")   # Finds summary info about a player
+        number = mainInfo.find("div", "profileHero_playerNumber__O1Q2x").text   # Finds player number
+        fNameLoc = mainInfo.find("div", class_="profileHero_firstName__xLp59")   # Finds location of player first name
+        fName = ""
+        if (fNameLoc != None):   # Formats player first name if they have one (accounts for players without first name)
+            fName = fNameLoc.text + " "
+        name = fName + mainInfo.find("div", class_="profileHero_lastName__vqwzU").text   # Sets up player name with first name and finds and adds last name
+        position = mainInfo.find("span", class_="profileHero_position__S51lz").text   # Finds position
+        currentNumber = number   # Updates currentNumber to check which player scraper is on
+        player = Player(name, position, number, None, None, None, None, None, None, 0, 0, 0, 0)   # Makes new Player object with data
+        print(player)
+        nextPlayer = soup.find("span", string="Next Player")   # Looks for "Next Player" prompt in corner of website
+        parent = nextPlayer.parent
+        parent2 = parent.parent
+        linkEnd = parent2["href"]   # Finds link embedded in website
+        link = "https://www.whufc.com" + str(linkEnd)   # Formats link
+        scrape = requests.get(link)   # Updates website needing to be scraped
 
 def main():
     scrape()
